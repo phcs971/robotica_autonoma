@@ -1,19 +1,57 @@
-from pyfirmata import ArduinoMega, util
-from helpers.direction_controller import  DirectionController
-from time import sleep
+import RPi.GPIO as GPIO
+from helpers.hcsr04 import HCSR04
+from helpers.led import LED
+from helpers.direction_controller import DirectionController
+import time
 
-port = '/dev/cu.usbmodem1413301'
+FRONT_LIMIT = 10 #cm
+LATERAL_LIMIT = 3 #cm
 
-board = ArduinoMega(port)
+TURN_180_DEGREES = 0.95 #s
+TURN_90_DEGREES = 0.5 #s
+SMALL_TURN = 0.1 #s
 
-led = board.get_pin('d:13:o')
+ 
+GPIO.setmode(GPIO.BCM)
 
-direction = DirectionController(board)
+front_sensor = HCSR04(18, 24, "Front")
+left_sensor = HCSR04(2, 3, "Left")
+right_sensor = HCSR04(17, 27, "Right")
 
-while True:
-    print("ON")
-    board.digital[13].write(1)
-    sleep(1)
-    print("OFF")
-    board.digital[13].write(0)
-    sleep(1)
+led = LED(19)
+
+dc = DirectionController()
+
+def main():
+    print("START")
+    while True: loop()
+        
+
+def loop():
+    led.periodic_toggle(1)
+    ft = front_sensor.distance()
+    lt = left_sensor.distance()
+    rt = right_sensor.distance()
+    if (ft > FRONT_LIMIT):
+        dc.forward()
+        if (lt < LATERAL_LIMIT):
+            dc.turn_right(SMALL_TURN)
+        if (rt < LATERAL_LIMIT):
+            dc.turn_left(SMALL_TURN)
+    else:
+        if (lt < FRONT_LIMIT and rt < FRONT_LIMIT):
+            dc.turn_left(TURN_180_DEGREES)
+        if (lt > rt):
+            dc.turn_left(TURN_90_DEGREES)
+        else:
+            dc.turn_right(TURN_90_DEGREES)
+        dc.full_break()
+    time.sleep(.01)
+    
+
+if __name__ == '__main__':
+    try:
+        main()
+        print("STOP")
+    except:
+        GPIO.cleanup()

@@ -1,32 +1,37 @@
-import pyfirmata
+import RPi.GPIO as GPIO
 
 class L298N:
-    def __init__(self, board: pyfirmata.Board):
-        self.IN1 = board.get_pin('d:2:o')
-        self.IN2 = board.get_pin('d:3:o')
-        self.IN3 = board.get_pin('d:4:o')
-        self.IN4 = board.get_pin('d:5:o')
+    def __init__(self):
+        self.IN2 = 16 # green
+        self.IN1 = 20 # yellow
+        self.IN4 = 21 # blue
+        self.IN3 = 26 # red
+
+        GPIO.setup(self.IN1, GPIO.OUT)
+        GPIO.setup(self.IN2, GPIO.OUT)
+        GPIO.setup(self.IN3, GPIO.OUT)
+        GPIO.setup(self.IN4, GPIO.OUT)
 
     def left_direct(self):
-        self.IN1.write(1)
-        self.IN2.write(0)
+        GPIO.output(self.IN1, True)
+        GPIO.output(self.IN2, False)
 
     def left_reverse(self):
-        self.IN1.write(0)
-        self.IN2.write(1)
+        GPIO.output(self.IN1, False)
+        GPIO.output(self.IN2, True)
 
     def left_break(self):
-        self.IN1.write(1)
-        self.IN2.write(1)
+        GPIO.output(self.IN1, True)
+        GPIO.output(self.IN2, True)
 
     def right_direct(self):
-        self.IN3.write(1)
-        self.IN4.write(0)
+        GPIO.output(self.IN3, True)
+        GPIO.output(self.IN4, False)
 
     def right_reverse(self):
-        self.IN3.write(0)
-        self.IN4.write(1)
+        GPIO.output(self.IN3, False)
+        GPIO.output(self.IN4, True)
 
     def right_break(self):
-        self.IN3.write(1)
-        self.IN4.write(1)
+        GPIO.output(self.IN3, True)
+        GPIO.output(self.IN4, True)

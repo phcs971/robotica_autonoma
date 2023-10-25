@@ -1,5 +1,5 @@
 import RPi.GPIO as GPIO
-import time
+import time, logging
 
 class HCSR04:
     def __init__(self, trigger: int, echo: int, name: str):
@@ -41,6 +41,8 @@ class HCSR04:
         # multiply with the sonic speed (34300 cm/s)
         # and divide by 2, because there and back
         distance = (TimeElapsed * 34300) / 2
+
+        logging.debug(f"{self.name} distance - %.1f cm" % distance)
     
         return distance
 
